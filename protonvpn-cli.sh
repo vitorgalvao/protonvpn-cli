@@ -19,7 +19,7 @@ if [[ ("$UID" != 0) && ("$1" != "ip") && ("$1" != "-ip") && \
   exit 1
 fi
 
-function check_requirements() {
+function check_requirements {
   if [[ -z $(which openvpn) ]]; then
     echo "[!] Error: openvpn is not installed. Install \`openvpn\` package to continue."
     exit 1
@@ -76,7 +76,7 @@ function check_requirements() {
   fi
 }
 
-function get_home() {
+function get_home {
   if [[ -z "$SUDO_USER" ]]; then
     CURRENT_USER="$(whoami)"
   else
@@ -89,7 +89,7 @@ function get_home() {
   echo "$USER_HOME"
 }
 
-function sha512sum_func() {
+function sha512sum_func {
   if [[ -n $(which sha512sum) ]]; then
     sha512sum_tool="$(which sha512sum)"
   elif [[ -n $(which shasum) ]]; then
@@ -98,11 +98,11 @@ function sha512sum_func() {
   export sha512sum_tool
 }
 
-function get_protonvpn_cli_home() {
+function get_protonvpn_cli_home {
   echo "$(get_home)/.protonvpn-cli"
 }
 
-function install_update_resolv_conf() {
+function install_update_resolv_conf {
   if [[ ("$UID" != 0) ]]; then
     echo "[!] Error: Installation requires root access."
     exit 1
@@ -121,7 +121,7 @@ function install_update_resolv_conf() {
   fi
 }
 
-function check_ip() {
+function check_ip {
   counter=0
   ip=""
   while [[ "$ip" == "" ]]; do
@@ -143,7 +143,7 @@ function check_ip() {
   echo "$ip"
 }
 
-function create_vi_bindings() {
+function create_vi_bindings {
     echo -en "
 bindkey menubox \\j ITEM_NEXT
 bindkey menubox \\k ITEM_PREV
@@ -155,7 +155,7 @@ bindkey menubox \\h FIELD_NEXT
 " > "$(get_protonvpn_cli_home)/.dialogrc"
 }
 
-function init_cli() {
+function init_cli {
   if [[ -f "$(get_protonvpn_cli_home)/protonvpn_openvpn_credentials" ]]; then
     echo -n "[!] User profile for protonvpn-cli has already been initialized. Would you like to start over with a fresh configuration? [Y/n]: "
     read "reset_profile"
@@ -228,7 +228,7 @@ function init_cli() {
   echo "[*] Done."
 }
 
-function detect_platform_type() {
+function detect_platform_type {
   unameOut="$(uname -s)"
   case "${unameOut}" in
     Linux*)     platform=linux;;
@@ -240,7 +240,7 @@ function detect_platform_type() {
   echo "$platform"
 }
 
-function manage_ipv6() {
+function manage_ipv6 {
   # ProtonVPN support for IPv6 coming soon.
   errors_counter=0
   if [[ ("$1" == "disable") && ( $(detect_platform_type) != "macos" ) ]]; then
@@ -325,11 +325,11 @@ function manage_ipv6() {
   fi
 }
 
-function sanitize_interface_name() {
+function sanitize_interface_name {
   echo "$1" | sed 's/[^a-zA-Z0-9_-]/_/g'
 }
 
-function modify_dns() {
+function modify_dns {
   # Backup DNS entries.
   if [[ ("$1" == "backup") ]]; then
     if [[  ( $(detect_platform_type) == "macos" ) ]]; then
@@ -388,7 +388,7 @@ function modify_dns() {
   fi
 }
 
-function is_internet_working_normally() {
+function is_internet_working_normally {
   if [[ "$(check_ip)" != "Error." ]]; then
     echo true
   else
@@ -396,14 +396,14 @@ function is_internet_working_normally() {
   fi
 }
 
-function check_if_internet_is_working_normally() {
+function check_if_internet_is_working_normally {
   if [[ "$(is_internet_working_normally)" == false ]]; then
     echo "[!] Error: There is an internet connection issue."
     exit 1
   fi
 }
 
-function is_openvpn_currently_running() {
+function is_openvpn_currently_running {
   if [[ $(pgrep openvpn) == "" ]]; then
     echo false
   else
@@ -411,14 +411,14 @@ function is_openvpn_currently_running() {
   fi
 }
 
-function check_if_openvpn_is_currently_running() {
+function check_if_openvpn_is_currently_running {
   if [[ $(is_openvpn_currently_running) == true ]]; then
     echo "[!] Error: OpenVPN is already running on this machine."
     exit 1
   fi
 }
 
-function check_if_profile_initialized() {
+function check_if_profile_initialized {
   _=$(cat "$(get_protonvpn_cli_home)/protonvpn_openvpn_credentials" "$(get_protonvpn_cli_home)/protonvpn_tier" &> /dev/null)
   if [[ $? != 0 ]]; then
     echo "[!] Profile is not initialized."
@@ -427,7 +427,7 @@ function check_if_profile_initialized() {
   fi
 }
 
-function openvpn_disconnect() {
+function openvpn_disconnect {
   max_checks=3
   counter=0
   disconnected=false
@@ -477,7 +477,7 @@ function openvpn_disconnect() {
   fi
 }
 
-function openvpn_connect() {
+function openvpn_connect {
   check_if_openvpn_is_currently_running
 
   modify_dns backup # Backing-up current DNS entries.
@@ -594,7 +594,7 @@ function openvpn_connect() {
   exit $status_exit
 }
 
-function update_cli() {
+function update_cli {
   check_if_internet_is_working_normally
 
   cli_path="/usr/local/bin/protonvpn-cli"
@@ -628,7 +628,7 @@ function update_cli() {
   fi
 }
 
-function install_cli() {
+function install_cli {
   mkdir -p "/usr/bin/" "/usr/local/bin/"
   cli="$(cd "$(dirname "$0")" && pwd -P)/$(basename "$0")"
   errors_counter=0
@@ -659,7 +659,7 @@ function install_cli() {
   fi
 }
 
-function uninstall_cli() {
+function uninstall_cli {
 
   if [[ $(is_openvpn_currently_running) == true ]]; then
     echo "[!] OpenVPN is currently running."
@@ -733,7 +733,7 @@ function print_console_status() {
 
 }
 
-function get_openvpn_config_info() {
+function get_openvpn_config_info {
   vpn_ip=$(awk '$1 == "remote" {print $2}' "$(get_protonvpn_cli_home)/protonvpn_openvpn_config.conf" | head -n 1)
   vpn_port=$(awk '$1 == "remote" {print $3}' "$(get_protonvpn_cli_home)/protonvpn_openvpn_config.conf" | head -n 1)
   vpn_type=$(awk '$1 == "proto" {print $2}' "$(get_protonvpn_cli_home)/protonvpn_openvpn_config.conf" | head -n 1)
@@ -741,7 +741,7 @@ function get_openvpn_config_info() {
   echo "$vpn_ip@$vpn_port@$vpn_type@$vpn_device_name"
 }
 
-function killswitch() {
+function killswitch {
   if [[ ! -f "$(get_protonvpn_cli_home)/.enable_killswitch" ]]; then
     return
   fi
@@ -789,7 +789,7 @@ function killswitch() {
   fi
 }
 
-function connect_to_fastest_vpn() {
+function connect_to_fastest_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -800,7 +800,7 @@ function connect_to_fastest_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function connect_to_fastest_p2p_vpn() {
+function connect_to_fastest_p2p_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -811,7 +811,7 @@ function connect_to_fastest_p2p_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function connect_to_fastest_tor_vpn() {
+function connect_to_fastest_tor_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -822,7 +822,7 @@ function connect_to_fastest_tor_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function connect_to_fastest_secure_core_vpn() {
+function connect_to_fastest_secure_core_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -833,7 +833,7 @@ function connect_to_fastest_secure_core_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function connect_to_random_vpn() {
+function connect_to_random_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -845,7 +845,7 @@ function connect_to_random_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function connect_to_previous_vpn() {
+function connect_to_previous_vpn {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -861,7 +861,7 @@ function connect_to_previous_vpn() {
   openvpn_connect "$config_id" "$selected_protocol"
 }
 
-function reconnect_to_current_vpn() {
+function reconnect_to_current_vpn {
   check_if_profile_initialized
 
   if [[ ! -f "$(get_protonvpn_cli_home)/.connection_config_id" ]] ; then
@@ -881,7 +881,7 @@ function reconnect_to_current_vpn() {
 }
 
 
-function connect_to_specific_server() {
+function connect_to_specific_server {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -933,7 +933,7 @@ function connect_to_specific_server() {
   exit 1
 }
 
-function connection_to_vpn_via_dialog_menu() {
+function connection_to_vpn_via_dialog_menu {
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
   check_if_internet_is_working_normally
@@ -995,7 +995,7 @@ function connection_to_vpn_via_dialog_menu() {
 
 }
 
-function connection_to_vpn_via_general_dialog_menu() {
+function connection_to_vpn_via_general_dialog_menu {
   echo "[$] Loading..."
   check_if_profile_initialized
   check_if_openvpn_is_currently_running
@@ -1020,7 +1020,7 @@ function connection_to_vpn_via_general_dialog_menu() {
   dialog_menu 'init'
 }
 
-function dialog_menu() {
+function dialog_menu {
   case $1 in
   'init')
     initial_menu_items=('1' 'Quick Connect' '2' 'Country Selection' '3' 'Specialty Servers')
@@ -1129,7 +1129,7 @@ function dialog_menu() {
   esac
 }
 
-function get_specialty_servers(){
+function get_specialty_servers {
   response_cache_path="$(get_protonvpn_cli_home)/.response_cache"
   tier=$(cat "$(get_protonvpn_cli_home)/protonvpn_tier")
 
@@ -1173,7 +1173,7 @@ END`
   echo "$output"
 }
 
-function get_vpn_countries() {
+function get_vpn_countries {
   response_cache_path="$(get_protonvpn_cli_home)/.response_cache"
 
   tier=$(cat "$(get_protonvpn_cli_home)/protonvpn_tier")
@@ -1205,7 +1205,7 @@ END`
   echo "$output"
 }
 
-function get_countries_server_list() {
+function get_countries_server_list {
   response_cache_path="$(get_protonvpn_cli_home)/.response_cache"
   tier=$(cat "$(get_protonvpn_cli_home)/protonvpn_tier")
 
@@ -1262,7 +1262,7 @@ END`
   echo "$output"
 }
 
-function get_vpn_server_details() {
+function get_vpn_server_details {
   response_cache_path="$(get_protonvpn_cli_home)/.response_cache.tmp"
   wget --header 'x-pm-appversion: Other' \
        --header 'x-pm-apiversion: 3' \
@@ -1302,7 +1302,7 @@ END`
 
 }
 
-function get_country_vpn_servers_details() {
+function get_country_vpn_servers_details {
   response_output=$(wget --header 'x-pm-appversion: Other' \
                          --header 'x-pm-apiversion: 3' \
                          --header 'Accept: application/vnd.protonmail.v1+json' \
@@ -1371,7 +1371,7 @@ END`
   echo "$output"
 }
 
-function get_fastest_vpn_connection_id() {
+function get_fastest_vpn_connection_id {
   required_feature=${1:-}
   response_output=$(wget --header 'x-pm-appversion: Other' \
                          --header 'x-pm-apiversion: 3' \
@@ -1425,7 +1425,7 @@ END`
   echo "$output"
 }
 
-function get_random_vpn_connection_id() {
+function get_random_vpn_connection_id {
   response_output=$(wget --header 'x-pm-appversion: Other' \
                          --header 'x-pm-apiversion: 3' \
                          --header 'Accept: application/vnd.protonmail.v1+json' \
@@ -1450,7 +1450,7 @@ END`
   echo "$output"
 }
 
-function get_vpn_config_details() {
+function get_vpn_config_details {
   response_output=$(wget --header 'x-pm-appversion: Other' \
                          --header 'x-pm-apiversion: 3' \
                          --header 'Accept: application/vnd.protonmail.v1+json' \
@@ -1494,7 +1494,7 @@ END`
   echo "$output"
 }
 
-function show_version() {
+function show_version {
     echo
     echo -e "ProtonVPN Command-Line Tool – v$version"
     echo "Copyright (c) 2013-2018 Proton Technologies A.G. (Switzerland)"
@@ -1502,7 +1502,7 @@ function show_version() {
     echo
 }
 
-function help_message() {
+function help_message {
     echo
     echo -e "ProtonVPN Command-Line Tool – v$version\n"
     echo -e "Usage: $(basename $0) [option]\n"
